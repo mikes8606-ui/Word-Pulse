@@ -231,7 +231,9 @@
         }
 
         function generateRandomPuzzle() {
-    const sixLetterWords = DICTIONARY.filter(w => w.length === 6);
+    // 1. Strict filter: Only use 6-letter words that have exactly 6 UNIQUE letters
+    const sixLetterWords = DICTIONARY.filter(w => w.length === 6 && new Set(w.split('')).size === 6);
+    
     let bestPuzzle = null;
     let maxAnswers = 0;
     let attempts = 0;
@@ -242,20 +244,31 @@
         
         let answers = DICTIONARY.filter(w => canFormWord(w, rootLetters));
         
-        // If it finds a perfect puzzle, serve it immediately
+        // 2. The "Swiss Army Knife" return object: includes every possible label 
+        // your core game logic might be looking for so it never returns undefined.
+                let puzzleObj = {
+            root: root,
+            word: root,
+            words: answers,
+            answers: answers,
+            validWords: answers,
+            letters: rootLetters
+        };
+
+        
+        // If it finds a highly playable puzzle, serve it
         if (answers.length >= 8) {
-            return { root: root, words: answers };
+            return puzzleObj;
         }
         
         // Otherwise, remember the best one it found so far
         if (answers.length > maxAnswers) {
             maxAnswers = answers.length;
-            bestPuzzle = { root: root, words: answers };
+            bestPuzzle = puzzleObj;
         }
         attempts++;
     }
     
-    // If it couldn't hit the threshold after 100 tries, serve the best possible option
     return bestPuzzle;
 }
 
