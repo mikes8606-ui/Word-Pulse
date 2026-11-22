@@ -10,12 +10,11 @@
         
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #020617; /* slate-950 */
+            background-color: #020617;
             overscroll-behavior-y: none;
             touch-action: manipulation;
         }
 
-        /* Custom Animations */
         @keyframes popIn {
             0% { transform: scale(0.8); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
@@ -41,7 +40,6 @@
 
         .letter-slot { transition: all 0.3s ease-in-out; }
 
-        /* Toast notifications */
         .toast-enter { opacity: 0; transform: translateY(20px); }
         .toast-enter-active { opacity: 1; transform: translateY(0); transition: opacity 300ms, transform 300ms; }
         .toast-exit { opacity: 1; }
@@ -52,14 +50,8 @@
         
         * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
 
-        /* --- JS DYNAMIC GRID SCALING --- */
-        :root {
-            --base-tile: 30px;
-        }
-
-        #word-lists-area {
-            align-content: center;
-        }
+        :root { --base-tile: 30px; }
+        #word-lists-area { align-content: center; }
 
         .letter-slot {
             width: var(--base-tile);
@@ -86,7 +78,6 @@
 </head>
 <body class="text-slate-200 h-[100dvh] w-screen overflow-hidden flex flex-col">
 
-    <!-- Header -->
     <header class="bg-slate-900 border-b border-slate-800 text-slate-100 shadow-md z-20 flex-shrink-0">
         <div class="w-full px-4 md:px-8 py-3 flex justify-between items-center">
             <div class="flex items-center gap-3">
@@ -109,39 +100,25 @@
                     <p class="text-slate-500 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">Time</p>
                     <p class="font-mono font-bold text-lg sm:text-xl leading-tight tabular-nums text-slate-200" id="ui-timer">3:00</p>
                 </div>
-                <button id="btn-settings" class="p-2 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-full transition-colors" aria-label="Settings">
+                <button id="btn-settings" class="p-2 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-full transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Main Game Area -->
     <main class="flex-1 flex flex-col overflow-hidden relative w-full bg-slate-950 min-h-0">
-        
-        <!-- Top Area: Word Grid (No max-w, dynamic JS scaled flex) -->
         <div id="grid-wrapper" class="flex-1 p-4 md:p-8 overflow-hidden w-full flex min-h-0">
-            <div id="word-lists-area" class="w-full h-full flex flex-wrap justify-center items-center content-center">
-                <!-- Grouped words and number badges will be generated here -->
-            </div>
+            <div id="word-lists-area" class="w-full h-full flex flex-wrap justify-center items-center content-center"></div>
         </div>
 
-        <!-- Bottom Area: Controls -->
         <div class="w-full bg-slate-900 border-t border-slate-800 p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] flex flex-col justify-end z-10 shrink-0" style="padding-bottom: max(1rem, env(safe-area-inset-bottom));">
-            
-            <!-- Current Input Display -->
             <div class="h-16 md:h-20 shrink-0 flex items-center justify-center gap-2 mb-4 bg-slate-950/60 rounded-xl border border-slate-800/60 p-2 mx-auto w-full max-w-4xl" id="input-display">
-                <div class="text-slate-600/70 font-medium tracking-wider text-[10px] md:text-xs flex items-center gap-2">
-                    TYPE OR TAP TO SPELL
-                </div>
+                <div class="text-slate-600/70 font-medium tracking-wider text-[10px] md:text-xs flex items-center gap-2">TYPE OR TAP TO SPELL</div>
             </div>
 
-            <!-- Letter Tiles (Generous Spacing for Tablets) -->
-            <div class="flex flex-row justify-center w-full gap-3 md:gap-8 mb-4" id="letter-board">
-                <!-- Letter buttons generated here -->
-            </div>
+            <div class="flex flex-row justify-center w-full gap-3 md:gap-8 mb-4" id="letter-board"></div>
 
-            <!-- Action Controls (Mix, Undo, Clear, Enter) -->
             <div class="grid grid-cols-4 gap-3 sm:gap-6 w-full max-w-3xl mx-auto mb-4 items-end">
                 <button id="btn-shuffle" class="touch-manipulation min-h-[2.75rem] md:min-h-[3.25rem] flex flex-col items-center justify-center p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition-colors active:bg-slate-600 border border-slate-700">
                     <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
@@ -161,7 +138,6 @@
                 </button>
             </div>
 
-            <!-- Quit / Next Button -->
             <div class="w-full max-w-3xl mx-auto">
                 <button id="btn-quit" class="touch-manipulation w-full min-h-[3rem] md:min-h-[3.5rem] flex items-center justify-center gap-2 p-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 font-bold transition-colors active:bg-slate-900 border border-slate-800">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -171,7 +147,6 @@
         </div>
     </main>
 
-    <!-- Settings Modal -->
     <div id="modal-settings" class="fixed inset-0 bg-slate-950/90 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity">
         <div class="bg-slate-900 rounded-2xl p-6 sm:p-8 w-full max-w-sm border border-slate-800 shadow-2xl transform scale-95 transition-transform" id="modal-settings-content">
             <h2 class="text-2xl font-bold text-slate-100 mb-6 text-center">Game Settings</h2>
@@ -191,11 +166,9 @@
         </div>
     </div>
 
-    <!-- Toast Container -->
     <div id="toast-container" class="fixed top-20 left-0 right-0 z-50 flex flex-col items-center gap-2 pointer-events-none px-4"></div>
 
     <script>
-        // Diagnostic Error Catcher (Will show a red banner if anything fails)
         window.onerror = function(msg, url, lineNo, columnNo, error) {
             const errDiv = document.createElement('div');
             errDiv.style.cssText = 'position:fixed; top:0; left:0; width:100%; background:#ef4444; color:white; z-index:9999; padding:15px; font-weight:bold; word-wrap:break-word; text-align:center;';
@@ -204,64 +177,82 @@
             return false;
         };
 
-        // Curated Dictionary (Includes 3,4,5,6 letter words & plurals)
-        const PUZZLES = [
-            {
-                root: "MASTER",
-                words: ["ARM", "ART", "ATE", "EAR", "EAT", "ERA", "MAR", "MAT", "MET", "RAM", "RAT", "SAT", "SEA", "SET", "TAR", "TEA", "ARMS", "ARTS", "ARES", "EARS", "EAST", "EATS", "ERAS", "MARE", "MARS", "MART", "MAST", "MATE", "MATS", "MEAT", "RAMS", "RATE", "RATS", "REAM", "REST", "SAME", "SATE", "SEAM", "SEAR", "SEAT", "STAR", "STEM", "TAME", "TAMS", "TARE", "TARS", "TEAM", "TEAR", "TEAS", "TERM", "MARES", "MARTS", "MATES", "MEATS", "RATES", "REAMS", "SMART", "SMEAR", "STARE", "STEAM", "TAMES", "TARES", "TEAMS", "TEARS", "TERMS", "MASTER", "STREAM"]
-            },
-            {
-                root: "CREATE",
-                words: ["ACE", "ACT", "ARC", "ARE", "ART", "ATE", "CAR", "CAT", "EAR", "EAT", "ERA", "RAT", "TAR", "TEA", "TEE", "ACRE", "CARE", "CART", "CATE", "RACE", "RATE", "TEAR", "TREE", "CATER", "CRATE", "ERECT", "REACT", "TRACE", "CREATE"]
-            },
-            {
-                root: "PLANET",
-                words: ["ALE", "ANT", "APE", "APT", "ATE", "EAT", "LAP", "LAT", "LEA", "LET", "NAP", "NET", "PAL", "PAN", "PAT", "PEA", "PEN", "PET", "TAP", "TEA", "TEN", "ANTE", "LANE", "LATE", "LEAP", "LENT", "PALE", "PANE", "PANT", "PATE", "PEAL", "PEAT", "PENT", "PLAN", "PLAT", "PLEA", "TALE", "TAPE", "TEAL", "PANEL", "PENAL", "PETAL", "PLANE", "PLANT", "PLATE", "PLEAT", "PLANET"]
-            },
-            {
-                root: "GARDEN",
-                words: ["AGE", "AND", "ARE", "DAN", "DEN", "EAR", "END", "ERA", "GAR", "NAG", "RAG", "RAN", "RED", "AGED", "DARE", "DARN", "DEAN", "DEAR", "DRAG", "EARN", "GEAR", "GRAD", "GRAN", "NERD", "RAGE", "READ", "REND", "ANGER", "GRADE", "GRAND", "RANGE", "DANGER", "GANDER", "GARDEN"]
-            },
-            {
-                root: "SPRING",
-                words: ["GIN", "INS", "PIG", "PIN", "RIG", "RIP", "SIN", "SIP", "SIR", "GINS", "GRIN", "GRIP", "PIGS", "PING", "PINS", "PRIG", "RIGS", "RING", "RIPS", "SIGN", "SING", "SNIP", "SPIN", "GRINS", "GRIPS", "PINGS", "PRIGS", "RINGS", "SPRIG", "SPRING", "SPRIGS"]
-            }
+        // 1. THE DICTIONARY
+        // This is a compressed starter list. You can add thousands of words to this array later.
+        const DICTIONARY = [
+            "ACT", "ACE", "ACRE", "AGE", "AGED", "ALE", "ALT", "AND", "ANGER", "ANT", "ANTE", "APE", "APT", "ARC", 
+            "ARE", "ARES", "ARM", "ARMS", "ART", "ARTS", "ATE", "CAR", "CARE", "CART", "CAST", "CASTLE", "CAT", 
+            "CATE", "CATER", "CATS", "CLOUD", "COP", "COPE", "CORE", "CORK", "COT", "CRATE", "CREATE", "DAN", 
+            "DANGER", "DARE", "DARN", "DEAN", "DEAR", "DEN", "DRAG", "EAR", "EARN", "EARS", "EAST", "EAT", 
+            "EATS", "END", "ERA", "ERAS", "ERECT", "GANDER", "GAR", "GARDEN", "GEAR", "GIN", "GINS", "GRAD", 
+            "GRADE", "GRAN", "GRAND", "GRIN", "GRINS", "GRIP", "GRIPS", "HEART", "INS", "LACE", "LANE", "LAP", 
+            "LAT", "LATE", "LATER", "LEA", "LEAP", "LENT", "LET", "MAKE", "MAKER", "MAR", "MARE", "MARES", 
+            "MARK", "MARKET", "MARS", "MART", "MARTS", "MAST", "MASTER", "MAT", "MATE", "MATES", "MATS", "MEAT", 
+            "MEATS", "MET", "NAG", "NAP", "NERD", "NET", "OPT", "ORE", "PAL", "PALE", "PAN", "PANE", "PANEL", 
+            "PANT", "PAT", "PATE", "PEA", "PEAL", "PEAT", "PEN", "PENAL", "PENT", "PET", "PETAL", "PIG", "PIGS", 
+            "PIN", "PING", "PINGS", "PINS", "PIXEL", "PLAN", "PLANE", "PLANET", "PLANT", "PLAT", "PLATE", "PLEA", 
+            "PLEAT", "POCKET", "POET", "POKE", "POT", "PRIG", "PRIGS", "PULSE", "RACE", "RAG", "RAGE", "RAM", 
+            "RAMS", "RAN", "RANGE", "RAT", "RATE", "RATES", "RATS", "REACT", "READ", "REAL", "REAM", "REAMS", 
+            "RED", "REND", "REST", "RIG", "RIGS", "RING", "RINGS", "RIP", "RIPS", "ROCK", "ROCKET", "ROT", 
+            "ROTE", "SALE", "SALT", "SAME", "SAT", "SATE", "SCALE", "SEA", "SEAL", "SEAM", "SEAR", "SEAT", 
+            "SET", "SIGN", "SIN", "SING", "SIP", "SIR", "SLATE", "SMART", "SMEAR", "SNIP", "SPIN", "SPRIG", 
+            "SPRIGS", "SPRING", "STALE", "STAR", "STARE", "STEAL", "STEAM", "STEM", "STREAM", "TABLE", "TAKE", 
+            "TAKER", "TALE", "TALES", "TAME", "TAMES", "TAMS", "TAP", "TAPE", "TAR", "TARE", "TARES", "TARS", 
+            "TEA", "TEAM", "TEAMS", "TEAR", "TEARS", "TEAS", "TEE", "TEN", "TERM", "TERMS", "TOE", "TOP", 
+            "TORE", "TRACE", "TRACK", "TRAVEL", "TREE", "WATCH"
         ];
 
-        // Safe Storage Implementation
-        let globalHighScore = 0;
-        try {
-            globalHighScore = parseInt(localStorage.getItem('wordPulseHighScore')) || 0;
-        } catch(e) {
-            console.warn("Storage blocked by Android", e);
+        // 2. THE GENERATOR ENGINE
+        function canFormWord(testWord, rootLetters) {
+            let available = [...rootLetters];
+            for (let char of testWord) {
+                let idx = available.indexOf(char);
+                if (idx === -1) return false;
+                available.splice(idx, 1);
+            }
+            return true;
         }
 
-        let gridResizeObserver = null;
-        
-        // Initialize High Score UI
+        function generateRandomPuzzle() {
+            // Find all 6-letter words to use as potential roots
+            const sixLetterWords = DICTIONARY.filter(w => w.length === 6);
+            let validPuzzle = null;
+
+            // Keep trying until we find a root that makes at least 8 valid words
+            while (!validPuzzle) {
+                let root = sixLetterWords[Math.floor(Math.random() * sixLetterWords.length)];
+                let rootLetters = root.split('');
+                
+                // Scan the entire dictionary for words that can be spelled with these letters
+                let answers = DICTIONARY.filter(w => canFormWord(w, rootLetters));
+                
+                if (answers.length >= 8) {
+                    validPuzzle = { root: root, words: answers };
+                }
+            }
+            return validPuzzle;
+        }
+
+        // --- Core Game Logic ---
+        let globalHighScore = 0;
+        try { globalHighScore = parseInt(localStorage.getItem('wordPulseHighScore')) || 0; } catch(e) {}
         document.getElementById('ui-high-score').innerText = globalHighScore;
 
         function saveHighScore(score) {
             if (score > globalHighScore) {
                 globalHighScore = score;
-                try {
-                    localStorage.setItem('wordPulseHighScore', globalHighScore);
-                } catch(e) {
-                    console.warn("Storage blocked by Android", e);
-                }
+                try { localStorage.setItem('wordPulseHighScore', globalHighScore); } catch(e) {}
                 document.getElementById('ui-high-score').innerText = globalHighScore;
             }
         }
 
-        // Game State
         let gameState = {
-            puzzleIndex: 0,
             puzzle: null,
             scrambledLetters: [], 
             currentInput: [], 
             foundWords: new Set(),
             score: 0,
-            duration: 180, // Default 3 mins
+            duration: 180,
             timeLeft: 180,
             timerInterval: null,
             isPaused: false,
@@ -303,12 +294,8 @@
         }
 
         function initGame() {
-            let newIndex = Math.floor(Math.random() * PUZZLES.length);
-            if (PUZZLES.length > 1 && newIndex === gameState.puzzleIndex) {
-                newIndex = (newIndex + 1) % PUZZLES.length;
-            }
-            gameState.puzzleIndex = newIndex;
-            gameState.puzzle = PUZZLES[newIndex];
+            // Generate a fresh puzzle on the fly!
+            gameState.puzzle = generateRandomPuzzle();
             
             const chars = gameState.puzzle.root.split('');
             shuffleArray(chars);
@@ -340,17 +327,14 @@
                 grouped[w.length].push(w);
             });
 
-            // Build out DOM for words
             Object.keys(grouped).sort((a,b)=>a-b).forEach(len => {
                 grouped[len].sort();
                 
-                // Length Badge
                 const badge = document.createElement('div');
                 badge.className = `length-badge flex items-center justify-center font-bold shrink-0 rounded-full bg-slate-800 text-purple-400 border border-slate-700 shadow-sm`;
                 badge.innerText = len;
                 DOM.wordListsArea.appendChild(badge);
 
-                // Word Containers
                 grouped[len].forEach(word => {
                     const wordContainer = document.createElement('div');
                     wordContainer.className = 'word-container flex transition-all';
@@ -375,7 +359,6 @@
             if (!DOM.gridWrapper) return;
             const style = window.getComputedStyle(DOM.gridWrapper);
             
-            // Safer calculations to prevent NaN crashes
             const padLeft = parseFloat(style.paddingLeft) || 0;
             const padRight = parseFloat(style.paddingRight) || 0;
             const padTop = parseFloat(style.paddingTop) || 0;
@@ -386,21 +369,19 @@
 
             if (W <= 0 || H <= 0) return;
 
-            let min = 15; // Minimum viable tile size
-            let max = 80; // Maximum allowed tile size
+            let min = 15;
+            let max = 80;
             let best = min;
 
-            // Binary Search for optimal tile scaling
             while (min <= max) {
                 let mid = Math.floor((min + max) / 2);
                 if (canFitGrid(mid, W, H, grouped)) {
                     best = mid;
-                    min = mid + 1; // Try bigger
+                    min = mid + 1;
                 } else {
-                    max = mid - 1; // Scale down
+                    max = mid - 1;
                 }
             }
-
             document.documentElement.style.setProperty('--base-tile', `${best}px`);
         }
 
@@ -444,7 +425,6 @@
                 }
             }
             currentY += rowHeight; 
-            
             return currentY <= H;
         }
 
@@ -472,7 +452,6 @@
                 DOM.inputDisplay.innerHTML = `<div class="text-slate-600/70 font-medium tracking-wider text-[10px] md:text-xs flex items-center gap-2">TYPE OR TAP TO SPELL</div>`;
                 return;
             }
-
             gameState.currentInput.forEach(item => {
                 const box = document.createElement('div');
                 box.className = 'w-9 h-11 md:w-11 md:h-12 bg-purple-600 text-white rounded-lg flex items-center justify-center font-bold text-xl md:text-2xl shadow-md border border-purple-500 animate-pop cursor-pointer active:bg-purple-700 touch-manipulation';
@@ -578,13 +557,11 @@
                     children[i].classList.remove('bg-slate-800', 'border-slate-600', 'text-transparent');
                     
                     if (isMissed) {
-                        // Faded Red for Missed Words
                         children[i].classList.add('bg-rose-950/70', 'border-rose-900', 'text-rose-500');
                     } else {
-                        // Found word
-                        if (word.length === 6) { // Pangrams in Gold
+                        if (word.length === 6) { 
                             children[i].classList.add('bg-amber-500', 'border-amber-400', 'text-slate-950', 'animate-found');
-                        } else { // Normal in Emerald
+                        } else { 
                             children[i].classList.add('bg-emerald-600', 'border-emerald-500', 'text-white', 'animate-found');
                         }
                     }
@@ -618,9 +595,9 @@
 
         function handleQuit() {
             if (gameState.isGameOver) {
-                initGame(); // Next Puzzle
+                initGame(); 
             } else {
-                endGame(false, true); // User chose to quit
+                endGame(false, true); 
             }
         }
 
@@ -637,7 +614,6 @@
             DOM.btnQuit.classList.add('animate-pop');
             setTimeout(()=> DOM.btnQuit.classList.remove('animate-pop'), 300);
 
-            // Reveal missed words in faded red
             const missed = gameState.puzzle.words.filter(w => !gameState.foundWords.has(w));
             missed.forEach(w => revealWordInGrid(w, true));
 
@@ -690,7 +666,6 @@
             }, 1500);
         }
 
-        // Event Listeners
         DOM.btnShuffle.addEventListener('click', handleShuffle);
         DOM.btnBackspace.addEventListener('click', handleBackspace);
         DOM.btnClear.addEventListener('click', handleClear);
@@ -700,14 +675,12 @@
         DOM.btnSettings.addEventListener('click', () => openModal(DOM.modalSettings, DOM.modalSettingsContent));
         DOM.btnCloseSettings.addEventListener('click', () => closeModal(DOM.modalSettings, DOM.modalSettingsContent));
 
-        // Setup resize observer for dynamic JS scaling on orientation change or resize
         let lastGridWidth = 0;
         let resizeDebounce = null;
         gridResizeObserver = new ResizeObserver((entries) => {
             if (!gameState.puzzle || entries.length === 0) return;
             const newWidth = entries[0].contentRect.width;
             
-            // Only recalculate if the width changed significantly (ignore height shifts to prevent dizzying scaling)
             if (Math.abs(newWidth - lastGridWidth) > 5) {
                 lastGridWidth = newWidth;
                 clearTimeout(resizeDebounce);
@@ -726,7 +699,6 @@
             gridResizeObserver.observe(DOM.gridWrapper);
         }
 
-        // Settings Duration Logic
         DOM.settingTimeBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 DOM.settingTimeBtns.forEach(b => {
@@ -742,7 +714,6 @@
             });
         });
 
-        // Keyboard Support
         document.addEventListener('keydown', (e) => {
             if (gameState.isPaused) return;
             
@@ -764,7 +735,6 @@
             }
         });
 
-        // Kick off the game!
         initGame();
     </script>
 </body>
