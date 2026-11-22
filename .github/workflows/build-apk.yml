@@ -104,11 +104,11 @@ jobs:
                   WebSettings webSettings = webView.getSettings();
                   webSettings.setJavaScriptEnabled(true);
                   webSettings.setDomStorageEnabled(true);
+                  webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
                   
                   webView.setWebViewClient(new WebViewClient());
                   
-                  // Load the game securely over the internet
-                  webView.loadUrl("https://mikes8606-ui.github.io/Word-Pulse/");
+                  webView.loadUrl("https://mikes8606-ui.github.io/Word-Pulse/?v=3");
               }
           }
           EOF
