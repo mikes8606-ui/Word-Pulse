@@ -231,24 +231,33 @@
         }
 
         function generateRandomPuzzle() {
-            // Find all 6-letter words to use as potential roots
-            const sixLetterWords = DICTIONARY.filter(w => w.length === 6);
-            let validPuzzle = null;
+    const sixLetterWords = DICTIONARY.filter(w => w.length === 6);
+    let bestPuzzle = null;
+    let maxAnswers = 0;
+    let attempts = 0;
 
-            // Keep trying until we find a root that makes at least 8 valid words
-            while (!validPuzzle) {
-                let root = sixLetterWords[Math.floor(Math.random() * sixLetterWords.length)];
-                let rootLetters = root.split('');
-                
-                // Scan the entire dictionary for words that can be spelled with these letters
-                let answers = DICTIONARY.filter(w => canFormWord(w, rootLetters));
-                
-                if (answers.length >= 8) {
-                    validPuzzle = { root: root, words: answers };
-                }
-            }
-            return validPuzzle;
+    while (attempts < 100) {
+        let root = sixLetterWords[Math.floor(Math.random() * sixLetterWords.length)];
+        let rootLetters = root.split('');
+        
+        let answers = DICTIONARY.filter(w => canFormWord(w, rootLetters));
+        
+        // If it finds a perfect puzzle, serve it immediately
+        if (answers.length >= 8) {
+            return { root: root, words: answers };
         }
+        
+        // Otherwise, remember the best one it found so far
+        if (answers.length > maxAnswers) {
+            maxAnswers = answers.length;
+            bestPuzzle = { root: root, words: answers };
+        }
+        attempts++;
+    }
+    
+    // If it couldn't hit the threshold after 100 tries, serve the best possible option
+    return bestPuzzle;
+}
 
         // --- Core Game Logic ---
         let globalHighScore = 0;
