@@ -21,16 +21,10 @@ jobs:
           mkdir -p app/src/main/res/values
           mkdir -p app/src/main/res/drawable
           mkdir -p app/src/main/res/mipmap-anydpi-v26
-          mkdir -p app/src/main/assets
           
           cat << 'EOF' > settings.gradle
-          pluginManagement {
-              repositories { google(); mavenCentral(); gradlePluginPortal() }
-          }
-          dependencyResolutionManagement {
-              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-              repositories { google(); mavenCentral() }
-          }
+          pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
+          dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }
           rootProject.name = 'Word Pulse'
           include ':app'
           EOF
@@ -50,10 +44,7 @@ jobs:
               defaultConfig { applicationId "com.mikes8606.wordpulse"; minSdk 24; targetSdk 34; versionCode 1; versionName "1.0" }
               compileOptions { sourceCompatibility JavaVersion.VERSION_1_8; targetCompatibility JavaVersion.VERSION_1_8 }
           }
-          dependencies { 
-              implementation 'androidx.appcompat:appcompat:1.6.1'
-              implementation 'androidx.webkit:webkit:1.9.0'
-          }
+          dependencies { implementation 'androidx.appcompat:appcompat:1.6.1' }
           EOF
 
           cat << 'EOF' > app/src/main/res/drawable/ic_launcher_background.xml
@@ -96,16 +87,10 @@ jobs:
           cat << 'EOF' > app/src/main/java/com/mikes8606/wordpulse/MainActivity.java
           package com.mikes8606.wordpulse;
           import android.os.Bundle;
-          import android.webkit.ConsoleMessage;
-          import android.webkit.WebChromeClient;
           import android.webkit.WebSettings;
           import android.webkit.WebView;
-          import android.webkit.WebResourceRequest;
-          import android.webkit.WebResourceResponse;
-          import android.widget.Toast;
+          import android.webkit.WebViewClient;
           import androidx.appcompat.app.AppCompatActivity;
-          import androidx.webkit.WebViewAssetLoader;
-          import androidx.webkit.WebViewClientCompat;
 
           public class MainActivity extends AppCompatActivity {
               @Override
@@ -114,45 +99,16 @@ jobs:
                   WebView webView = new WebView(this);
                   setContentView(webView);
                   
-                  // Instantly set dark slate background to prevent white screen flashes
                   webView.setBackgroundColor(android.graphics.Color.parseColor("#0f172a"));
                   
                   WebSettings webSettings = webView.getSettings();
                   webSettings.setJavaScriptEnabled(true);
                   webSettings.setDomStorageEnabled(true);
-                  webSettings.setDatabaseEnabled(true);
-                  webSettings.setAllowFileAccess(true);
-                  webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
                   
-                  // Spoof localhost for Firebase whitelisting
-                  final WebViewAssetLoader assetLoader = new WebViewAssetLoader.Builder()
-                      .setDomain("localhost")
-                      .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
-                      .build();
-
-                  webView.setWebViewClient(new WebViewClientCompat() {
-                      @Override
-                      public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-                          return assetLoader.shouldInterceptRequest(request.getUrl());
-                      }
-                      
-                      @Override
-                      public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                          Toast.makeText(MainActivity.this, "Network Error: " + description, Toast.LENGTH_LONG).show();
-                      }
-                  });
+                  webView.setWebViewClient(new WebViewClient());
                   
-                  webView.setWebChromeClient(new WebChromeClient() {
-                      @Override
-                      public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
-                          if (consoleMessage.messageLevel() == ConsoleMessage.MessageLevel.ERROR) {
-                              Toast.makeText(MainActivity.this, "JS Error: " + consoleMessage.message(), Toast.LENGTH_LONG).show();
-                          }
-                          return super.onConsoleMessage(consoleMessage);
-                      }
-                  });
-                  
-                  webView.loadUrl("https://localhost/assets/index.html");
+                  // Load the game securely over the internet
+                  webView.loadUrl("https://mikes8606-ui.github.io/Word-Pulse/");
               }
           }
           EOF
@@ -172,8 +128,6 @@ jobs:
               </style>
           </resources>
           EOF
-          
-          cp index.html app/src/main/assets/
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
@@ -181,7 +135,7 @@ jobs:
           gradle-version: '8.4'
         
       - name: Build Debug APK
-        run: gradle assembleDebug --info
+        run: gradle assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
