@@ -19,65 +19,67 @@ jobs:
         run: |
           mkdir -p app/src/main/java/com/mikes8606/wordpulse
           mkdir -p app/src/main/res/values
+          mkdir -p app/src/main/res/drawable
+          mkdir -p app/src/main/res/mipmap-anydpi-v26
           mkdir -p app/src/main/assets
           
           cat << 'EOF' > settings.gradle
           pluginManagement {
-              repositories {
-                  google()
-                  mavenCentral()
-                  gradlePluginPortal()
-              }
+              repositories { google(); mavenCentral(); gradlePluginPortal() }
           }
           dependencyResolutionManagement {
               repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-              repositories {
-                  google()
-                  mavenCentral()
-              }
+              repositories { google(); mavenCentral() }
           }
           rootProject.name = 'Word Pulse'
           include ':app'
           EOF
           
           cat << 'EOF' > build.gradle
-          plugins {
-              id 'com.android.application' version '8.1.2' apply false
-          }
+          plugins { id 'com.android.application' version '8.1.2' apply false }
           EOF
           
           echo "android.useAndroidX=true" > gradle.properties
           echo "android.enableJetifier=true" >> gradle.properties
           
           cat << 'EOF' > app/build.gradle
-          plugins {
-              id 'com.android.application'
-          }
+          plugins { id 'com.android.application' }
           android {
               namespace 'com.mikes8606.wordpulse'
               compileSdk 34
-              defaultConfig {
-                  applicationId "com.mikes8606.wordpulse"
-                  minSdk 24
-                  targetSdk 34
-                  versionCode 1
-                  versionName "1.0"
-              }
-              compileOptions {
-                  sourceCompatibility JavaVersion.VERSION_1_8
-                  targetCompatibility JavaVersion.VERSION_1_8
-              }
+              defaultConfig { applicationId "com.mikes8606.wordpulse"; minSdk 24; targetSdk 34; versionCode 1; versionName "1.0" }
+              compileOptions { sourceCompatibility JavaVersion.VERSION_1_8; targetCompatibility JavaVersion.VERSION_1_8 }
           }
-          dependencies {
-              implementation 'androidx.appcompat:appcompat:1.6.1'
-          }
+          dependencies { implementation 'androidx.appcompat:appcompat:1.6.1' }
+          EOF
+
+          cat << 'EOF' > app/src/main/res/drawable/ic_launcher_background.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+              <path android:fillColor="#0f172a" android:pathData="M0,0h108v108h-108z"/>
+          </vector>
+          EOF
+
+          cat << 'EOF' > app/src/main/res/drawable/ic_launcher_foreground.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="24" android:viewportHeight="24">
+              <path android:strokeColor="#10b981" android:strokeWidth="1.5" android:strokeLineCap="round" android:strokeLineJoin="round" android:fillColor="#00000000" android:pathData="M3,12h4l2.5,-6l4.5,12l3.5,-6h3.5"/>
+          </vector>
+          EOF
+
+          cat << 'EOF' > app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+              <background android:drawable="@drawable/ic_launcher_background" />
+              <foreground android:drawable="@drawable/ic_launcher_foreground" />
+          </adaptive-icon>
           EOF
           
           cat << 'EOF' > app/src/main/AndroidManifest.xml
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
               <uses-permission android:name="android.permission.INTERNET" />
-              <application android:allowBackup="true" android:label="Word Pulse" android:supportsRtl="true" android:theme="@style/Theme.WordPulse">
+              <application android:allowBackup="true" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher" android:label="Word Pulse" android:supportsRtl="true" android:theme="@style/Theme.WordPulse">
                   <activity android:name=".MainActivity" android:exported="true" android:theme="@style/Theme.WordPulse.NoActionBar">
                       <intent-filter>
                           <action android:name="android.intent.action.MAIN" />
@@ -91,6 +93,7 @@ jobs:
           cat << 'EOF' > app/src/main/java/com/mikes8606/wordpulse/MainActivity.java
           package com.mikes8606.wordpulse;
           import android.os.Bundle;
+          import android.webkit.WebChromeClient;
           import android.webkit.WebSettings;
           import android.webkit.WebView;
           import android.webkit.WebViewClient;
@@ -104,6 +107,10 @@ jobs:
                   WebSettings webSettings = webView.getSettings();
                   webSettings.setJavaScriptEnabled(true);
                   webSettings.setDomStorageEnabled(true);
+                  webSettings.setAllowFileAccessFromFileURLs(true);
+                  webSettings.setAllowUniversalAccessFromFileURLs(true);
+                  webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+                  webView.setWebChromeClient(new WebChromeClient());
                   webView.setWebViewClient(new WebViewClient());
                   webView.loadUrl("file:///android_asset/index.html");
               }
@@ -126,7 +133,6 @@ jobs:
           </resources>
           EOF
           
-          # This moves your game file into the correct Android folder before compiling
           cp index.html app/src/main/assets/
 
       - name: Setup Gradle
