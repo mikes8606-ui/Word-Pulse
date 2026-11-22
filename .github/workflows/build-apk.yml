@@ -50,7 +50,10 @@ jobs:
               defaultConfig { applicationId "com.mikes8606.wordpulse"; minSdk 24; targetSdk 34; versionCode 1; versionName "1.0" }
               compileOptions { sourceCompatibility JavaVersion.VERSION_1_8; targetCompatibility JavaVersion.VERSION_1_8 }
           }
-          dependencies { implementation 'androidx.appcompat:appcompat:1.6.1' }
+          dependencies { 
+              implementation 'androidx.appcompat:appcompat:1.6.1'
+              implementation 'androidx.webkit:webkit:1.9.0'
+          }
           EOF
 
           cat << 'EOF' > app/src/main/res/drawable/ic_launcher_background.xml
@@ -93,13 +96,16 @@ jobs:
           cat << 'EOF' > app/src/main/java/com/mikes8606/wordpulse/MainActivity.java
           package com.mikes8606.wordpulse;
           import android.os.Bundle;
+          import android.webkit.ConsoleMessage;
           import android.webkit.WebChromeClient;
           import android.webkit.WebSettings;
           import android.webkit.WebView;
-          import android.webkit.WebViewClient;
+          import android.webkit.WebResourceRequest;
+          import android.webkit.WebResourceResponse;
+          import android.widget.Toast;
           import androidx.appcompat.app.AppCompatActivity;
-          import java.io.InputStream;
-          import java.io.ByteArrayOutputStream;
+          import androidx.webkit.WebViewAssetLoader;
+          import androidx.webkit.WebViewClientCompat;
 
           public class MainActivity extends AppCompatActivity {
               @Override
@@ -108,29 +114,45 @@ jobs:
                   WebView webView = new WebView(this);
                   setContentView(webView);
                   
+                  // Instantly set dark slate background to prevent white screen flashes
+                  webView.setBackgroundColor(android.graphics.Color.parseColor("#0f172a"));
+                  
                   WebSettings webSettings = webView.getSettings();
                   webSettings.setJavaScriptEnabled(true);
                   webSettings.setDomStorageEnabled(true);
                   webSettings.setDatabaseEnabled(true);
+                  webSettings.setAllowFileAccess(true);
+                  webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
                   
-                  webView.setWebChromeClient(new WebChromeClient());
-                  webView.setWebViewClient(new WebViewClient());
+                  // Spoof localhost for Firebase whitelisting
+                  final WebViewAssetLoader assetLoader = new WebViewAssetLoader.Builder()
+                      .setDomain("localhost")
+                      .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
+                      .build();
 
-                  try {
-                      InputStream is = getAssets().open("index.html");
-                      ByteArrayOutputStream result = new ByteArrayOutputStream();
-                      byte[] buffer = new byte[1024];
-                      int length;
-                      while ((length = is.read(buffer)) != -1) {
-                          result.write(buffer, 0, length);
+                  webView.setWebViewClient(new WebViewClientCompat() {
+                      @Override
+                      public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                          return assetLoader.shouldInterceptRequest(request.getUrl());
                       }
-                      String html = result.toString("UTF-8");
                       
-                      // Inject the HTML directly while spoofing the localhost domain for Firebase
-                      webView.loadDataWithBaseURL("https://localhost", html, "text/html", "UTF-8", null);
-                  } catch (Exception e) {
-                      e.printStackTrace();
-                  }
+                      @Override
+                      public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                          Toast.makeText(MainActivity.this, "Network Error: " + description, Toast.LENGTH_LONG).show();
+                      }
+                  });
+                  
+                  webView.setWebChromeClient(new WebChromeClient() {
+                      @Override
+                      public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+                          if (consoleMessage.messageLevel() == ConsoleMessage.MessageLevel.ERROR) {
+                              Toast.makeText(MainActivity.this, "JS Error: " + consoleMessage.message(), Toast.LENGTH_LONG).show();
+                          }
+                          return super.onConsoleMessage(consoleMessage);
+                      }
+                  });
+                  
+                  webView.loadUrl("https://localhost/assets/index.html");
               }
           }
           EOF
