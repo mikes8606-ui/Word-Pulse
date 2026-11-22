@@ -195,6 +195,15 @@
     <div id="toast-container" class="fixed top-20 left-0 right-0 z-50 flex flex-col items-center gap-2 pointer-events-none px-4"></div>
 
     <script>
+        // Diagnostic Error Catcher (Will show a red banner if anything fails)
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            const errDiv = document.createElement('div');
+            errDiv.style.cssText = 'position:fixed; top:0; left:0; width:100%; background:#ef4444; color:white; z-index:9999; padding:15px; font-weight:bold; word-wrap:break-word; text-align:center;';
+            errDiv.innerText = `Crash detected: ${msg} (Line ${lineNo})`;
+            document.body.appendChild(errDiv);
+            return false;
+        };
+
         // Curated Dictionary (Includes 3,4,5,6 letter words & plurals)
         const PUZZLES = [
             {
@@ -219,7 +228,14 @@
             }
         ];
 
-        let globalHighScore = parseInt(localStorage.getItem('wordPulseHighScore')) || 0;
+        // Safe Storage Implementation
+        let globalHighScore = 0;
+        try {
+            globalHighScore = parseInt(localStorage.getItem('wordPulseHighScore')) || 0;
+        } catch(e) {
+            console.warn("Storage blocked by Android", e);
+        }
+
         let gridResizeObserver = null;
         
         // Initialize High Score UI
@@ -228,7 +244,11 @@
         function saveHighScore(score) {
             if (score > globalHighScore) {
                 globalHighScore = score;
-                localStorage.setItem('wordPulseHighScore', globalHighScore);
+                try {
+                    localStorage.setItem('wordPulseHighScore', globalHighScore);
+                } catch(e) {
+                    console.warn("Storage blocked by Android", e);
+                }
                 document.getElementById('ui-high-score').innerText = globalHighScore;
             }
         }
@@ -354,8 +374,15 @@
         function calculateAndApplyGridScale(grouped) {
             if (!DOM.gridWrapper) return;
             const style = window.getComputedStyle(DOM.gridWrapper);
-            const W = DOM.gridWrapper.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
-            const H = DOM.gridWrapper.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+            
+            // Safer calculations to prevent NaN crashes
+            const padLeft = parseFloat(style.paddingLeft) || 0;
+            const padRight = parseFloat(style.paddingRight) || 0;
+            const padTop = parseFloat(style.paddingTop) || 0;
+            const padBottom = parseFloat(style.paddingBottom) || 0;
+            
+            const W = DOM.gridWrapper.clientWidth - padLeft - padRight;
+            const H = DOM.gridWrapper.clientHeight - padTop - padBottom;
 
             if (W <= 0 || H <= 0) return;
 
@@ -703,5 +730,42 @@
         DOM.settingTimeBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 DOM.settingTimeBtns.forEach(b => {
-                    b.classList.remove('border-purple
-!-- REPLACE THIS FILE WITH YOUR ACTUAL GAME index.html BEFORE UPLOADING -->
+                    b.classList.remove('border-purple-500', 'bg-purple-900/30', 'text-purple-300', 'border-2');
+                    b.classList.add('border-slate-700', 'bg-slate-800', 'text-slate-300', 'border');
+                });
+                const target = e.target;
+                target.classList.remove('border-slate-700', 'bg-slate-800', 'text-slate-300', 'border');
+                target.classList.add('border-purple-500', 'bg-purple-900/30', 'text-purple-300', 'border-2');
+                
+                gameState.duration = parseInt(target.getAttribute('data-time'));
+                showToast("Timer updated for next game");
+            });
+        });
+
+        // Keyboard Support
+        document.addEventListener('keydown', (e) => {
+            if (gameState.isPaused) return;
+            
+            const key = e.key.toUpperCase();
+            if (key === 'ENTER') handleSubmit();
+            else if (key === 'BACKSPACE') handleBackspace();
+            else if (key === ' ' || e.code === 'Space') {
+                handleShuffle();
+                e.preventDefault();
+            } else if (/^[A-Z]$/.test(key)) {
+                if (gameState.isGameOver) return;
+                const availableItem = gameState.scrambledLetters.find(item => item.char === key && !item.used);
+                if (availableItem) handleLetterClick(availableItem);
+                else {
+                    DOM.inputDisplay.classList.remove('animate-shake');
+                    void DOM.inputDisplay.offsetWidth;
+                    DOM.inputDisplay.classList.add('animate-shake');
+                }
+            }
+        });
+
+        // Kick off the game!
+        initGame();
+    </script>
+</body>
+</html>
