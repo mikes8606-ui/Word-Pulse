@@ -1,1 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Word Pulse</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --text-color: #f8fafc;
+            --emerald: #10b981;
+            --gray: #475569;
+            --keyboard-bg: #1e293b;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            touch-action: manipulation;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 500px;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--gray);
+            box-sizing: border-box;
+        }
+        h1 { margin: 0; font-size: 1.5rem; letter-spacing: 2px; color: var(--emerald); }
+        .score-container { text-align: right; font-size: 0.9rem; font-weight: bold; }
+        
+        #board-container {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        #board {
+            display: grid;
+            grid-template-rows: repeat(6, 1fr);
+            grid-gap: 6px;
+            width: 100%;
+            max-width: 350px;
+            aspect-ratio: 5/6;
+        }
+        .row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-gap: 6px;
+        }
+        .tile {
+            border: 2px solid var(--gray);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .tile.correct { background-color: var(--emerald); border-color: var(--emerald); }
+        .tile.present { background-color: #eab308; border-color: #eab308; }
+        .tile.absent { background-color: var(--gray); border-color: var(--gray); }
+        
+        #keyboard {
+            width: 100%;
+            max-width: 500px;
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .key-row {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+        }
+        button {
+            background-color: var(--keyboard-bg);
+            color: var(--text-color);
+            border: none;
+            border-radius: 4px;
+            height: 55px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            flex: 1;
+            text-transform: uppercase;
+        }
+        .controls-row {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        .controls-row button {
+            max-width: none;
+            font-size: 1rem;
+        }
+        .enter-btn { background-color: var(--emerald); color: #020617; }
+        
+        #message {
+            height: 24px;
+            font-weight: bold;
+            color: #ef4444;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>WORD PULSE</h1>
+        <div class="score-container">
+            <div>Streak: <span id="current-score">0</span></div>
+            <div>Best: <span id="high-score">0</span></div>
+        </div>
+    </header>
+    
+    <div id="message"></div>
+    
+    <div id="board-container">
+        <div id="board"></div>
+    </div>
+    
+    <div id="keyboard">
+        <div class="key-row">
+            <button onclick="typeLetter('Q')">Q</button>
+            <button onclick="typeLetter('W')">W</button>
+            <button onclick="typeLetter('E')">E</button>
+            <button onclick="typeLetter('R')">R</button>
+            <button onclick="typeLetter('T')">T</button>
+            <button onclick="typeLetter('Y')">Y</button>
+            <button onclick="typeLetter('U')">U</button>
+            <button onclick="typeLetter('I')">I</button>
+            <button onclick="typeLetter('O')">O</button>
+            <button onclick="typeLetter('P')">P</button>
+        </div>
+        <div class="key-row">
+            <button onclick="typeLetter('A')">A</button>
+            <button onclick="typeLetter('S')">S</button>
+            <button onclick="typeLetter('D')">D</button>
+            <button onclick="typeLetter('F')">F</button>
+            <button onclick="typeLetter('G')">G</button>
+            <button onclick="typeLetter('H')">H</button>
+            <button onclick="typeLetter('J')">J</button>
+            <button onclick="typeLetter('K')">K</button>
+            <button onclick="typeLetter('L')">L</button>
+        </div>
+        <div class="key-row">
+            <button onclick="typeLetter('Z')">Z</button>
+            <button onclick="typeLetter('X')">X</button>
+            <button onclick="typeLetter('C')">C</button>
+            <button onclick="typeLetter('V')">V</button>
+            <button onclick="typeLetter('B')">B</button>
+            <button onclick="typeLetter('N')">N</button>
+            <button onclick="typeLetter('M')">M</button>
+        </div>
+        <div class="controls-row">
+            <button class="enter-btn" onclick="submitGuess()">ENTER</button>
+            <button onclick="clearRow()">CLEAR</button>
+            <button onclick="undoLetter()">UNDO</button>
+        </div>
+    </div>
+
+    <script>
+        let bestScore = parseInt(localStorage.getItem('wordPulseHighScore')) || 0;
+        let streak = 0;
+        document.getElementById('high-score').innerText = bestScore;
+        
+        const words = ["PULSE", "SMART", "PIXEL", "TABLE", "HEART", "PHONE", "WATCH", "TRACK", "CLOUD", "CABLE", "BOARD"];
+        let targetWord = words[Math.floor(Math.random() * words.length)];
+        let currentRow = 0;
+        let currentTile = 0;
+        let gameOver = false;
+        
+        const board = document.getElementById('board');
+        for (let r = 0; r < 6; r++) {
+            let row = document.createElement('div');
+            row.className = 'row';
+            for (let c = 0; c < 5; c++) {
+                let tile = document.createElement('div');
+                tile.className = 'tile';
+                tile.id = `tile-${r}-${c}`;
+                row.appendChild(tile);
+            }
+            board.appendChild(row);
+        }
+        
+        function showMsg(msg) {
+            const el = document.getElementById('message');
+            el.innerText = msg;
+            setTimeout(() => el.innerText = '', 2500);
+        }
+
+        function typeLetter(letter) {
+            if (gameOver || currentTile >= 5) return;
+            document.getElementById(`tile-${currentRow}-${currentTile}`).innerText = letter;
+            currentTile++;
+        }
+        
+        function undoLetter() {
+            if (gameOver || currentTile === 0) return;
+            currentTile--;
+            document.getElementById(`tile-${currentRow}-${currentTile}`).innerText = '';
+        }
+
+        function clearRow() {
+            if (gameOver) return;
+            while (currentTile > 0) undoLetter();
+        }
+        
+        function submitGuess() {
+            if (gameOver) return;
+            if (currentTile < 5) {
+                showMsg("Not enough letters");
+                return;
+            }
+            
+            let guess = "";
+            for (let c = 0; c < 5; c++) {
+                guess += document.getElementById(`tile-${currentRow}-${c}`).innerText;
+            }
+            
+            let targetArr = targetWord.split('');
+            let guessArr = guess.split('');
+            
+            for (let c = 0; c < 5; c++) {
+                let tile = document.getElementById(`tile-${currentRow}-${c}`);
+                if (guessArr[c] === targetArr[c]) {
+                    tile.classList.add('correct');
+                    targetArr[c] = null;
+                    guessArr[c] = null;
+                }
+            }
+            for (let c = 0; c < 5; c++) {
+                if (guessArr[c] === null) continue;
+                let tile = document.getElementById(`tile-${currentRow}-${c}`);
+                let idx = targetArr.indexOf(guessArr[c]);
+                if (idx !== -1) {
+                    tile.classList.add('present');
+                    targetArr[idx] = null;
+                } else {
+                    tile.classList.add('absent');
+                }
+            }
+            
+            if (guess === targetWord) {
+                showMsg("PULSE FOUND!");
+                streak++;
+                document.getElementById('current-score').innerText = streak;
+                if (streak > bestScore) {
+                    bestScore = streak;
+                    localStorage.setItem('wordPulseHighScore', bestScore);
+                    document.getElementById('high-score').innerText = bestScore;
+                }
+                gameOver = true;
+                setTimeout(reset, 2000);
+            } else {
+                currentRow++;
+                currentTile = 0;
+                if (currentRow >= 6) {
+                    showMsg("GAME OVER. Word was: " + targetWord);
+                    streak = 0;
+                    document.getElementById('current-score').innerText = streak;
+                    gameOver = true;
+                    setTimeout(reset, 3000);
+                }
+            }
+        }
+
+        function reset() {
+            targetWord = words[Math.floor(Math.random() * words.length)];
+            currentRow = 0;
+            currentTile = 0;
+            gameOver = false;
+            document.querySelectorAll('.tile').forEach(t => {
+                t.innerText = '';
+                t.className = 'tile';
+            });
+        }
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') submitGuess();
+            else if (e.key === 'Backspace') undoLetter();
+            else if (e.key === 'Escape') clearRow();
+            else if (/^[A-Za-z]$/.test(e.key)) typeLetter(e.key.toUpperCase());
+        });
+    </script>
+</body>
+</html>
 <!-- REPLACE THIS FILE WITH YOUR ACTUAL GAME index.html BEFORE UPLOADING -->
