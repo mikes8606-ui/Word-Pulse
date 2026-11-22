@@ -41,7 +41,7 @@ jobs:
           android {
               namespace 'com.mikes8606.wordpulse'
               compileSdk 34
-              defaultConfig { applicationId "com.mikes8606.wordpulse"; minSdk 24; targetSdk 34; versionCode 1; versionName "1.0" }
+              defaultConfig { applicationId "com.mikes8606.wordpulse"; minSdk 24; targetSdk 34; versionCode 2; versionName "1.1" }
               compileOptions { sourceCompatibility JavaVersion.VERSION_1_8; targetCompatibility JavaVersion.VERSION_1_8 }
           }
           dependencies { implementation 'androidx.appcompat:appcompat:1.6.1' }
@@ -108,7 +108,7 @@ jobs:
                   
                   webView.setWebViewClient(new WebViewClient());
                   
-                  webView.loadUrl("https://mikes8606-ui.github.io/Word-Pulse/?v=3");
+                  webView.loadUrl("https://mikes8606-ui.github.io/Word-Pulse/?v=4");
               }
           }
           EOF
