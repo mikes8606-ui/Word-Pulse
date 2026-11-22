@@ -50,10 +50,7 @@ jobs:
               defaultConfig { applicationId "com.mikes8606.wordpulse"; minSdk 24; targetSdk 34; versionCode 1; versionName "1.0" }
               compileOptions { sourceCompatibility JavaVersion.VERSION_1_8; targetCompatibility JavaVersion.VERSION_1_8 }
           }
-          dependencies { 
-              implementation 'androidx.appcompat:appcompat:1.6.1'
-              implementation 'androidx.webkit:webkit:1.9.0'
-          }
+          dependencies { implementation 'androidx.appcompat:appcompat:1.6.1' }
           EOF
 
           cat << 'EOF' > app/src/main/res/drawable/ic_launcher_background.xml
@@ -99,11 +96,10 @@ jobs:
           import android.webkit.WebChromeClient;
           import android.webkit.WebSettings;
           import android.webkit.WebView;
-          import android.webkit.WebResourceRequest;
-          import android.webkit.WebResourceResponse;
+          import android.webkit.WebViewClient;
           import androidx.appcompat.app.AppCompatActivity;
-          import androidx.webkit.WebViewAssetLoader;
-          import androidx.webkit.WebViewClientCompat;
+          import java.io.InputStream;
+          import java.io.ByteArrayOutputStream;
 
           public class MainActivity extends AppCompatActivity {
               @Override
@@ -111,23 +107,30 @@ jobs:
                   super.onCreate(savedInstanceState);
                   WebView webView = new WebView(this);
                   setContentView(webView);
+                  
                   WebSettings webSettings = webView.getSettings();
                   webSettings.setJavaScriptEnabled(true);
                   webSettings.setDomStorageEnabled(true);
-                  
-                  final WebViewAssetLoader assetLoader = new WebViewAssetLoader.Builder()
-                      .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
-                      .build();
-
-                  webView.setWebViewClient(new WebViewClientCompat() {
-                      @Override
-                      public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-                          return assetLoader.shouldInterceptRequest(request.getUrl());
-                      }
-                  });
+                  webSettings.setDatabaseEnabled(true);
                   
                   webView.setWebChromeClient(new WebChromeClient());
-                  webView.loadUrl("https://appassets.androidplatform.net/assets/index.html");
+                  webView.setWebViewClient(new WebViewClient());
+
+                  try {
+                      InputStream is = getAssets().open("index.html");
+                      ByteArrayOutputStream result = new ByteArrayOutputStream();
+                      byte[] buffer = new byte[1024];
+                      int length;
+                      while ((length = is.read(buffer)) != -1) {
+                          result.write(buffer, 0, length);
+                      }
+                      String html = result.toString("UTF-8");
+                      
+                      // Inject the HTML directly while spoofing the localhost domain for Firebase
+                      webView.loadDataWithBaseURL("https://localhost", html, "text/html", "UTF-8", null);
+                  } catch (Exception e) {
+                      e.printStackTrace();
+                  }
               }
           }
           EOF
