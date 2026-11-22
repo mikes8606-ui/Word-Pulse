@@ -21,24 +21,28 @@ jobs:
           mkdir -p app/src/main/res/values
           mkdir -p app/src/main/assets
           
-          echo "include ':app'" > settings.gradle
-          echo "rootProject.name = 'Word Pulse'" >> settings.gradle
-          
-          cat << 'EOF' > build.gradle
-          buildscript {
+          cat << 'EOF' > settings.gradle
+          pluginManagement {
               repositories {
                   google()
                   mavenCentral()
-              }
-              dependencies {
-                  classpath "com.android.tools.build:gradle:8.1.2"
+                  gradlePluginPortal()
               }
           }
-          allprojects {
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
               repositories {
                   google()
                   mavenCentral()
               }
+          }
+          rootProject.name = 'Word Pulse'
+          include ':app'
+          EOF
+          
+          cat << 'EOF' > build.gradle
+          plugins {
+              id 'com.android.application' version '8.1.2' apply false
           }
           EOF
           
@@ -71,7 +75,7 @@ jobs:
           
           cat << 'EOF' > app/src/main/AndroidManifest.xml
           <?xml version="1.0" encoding="utf-8"?>
-          <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.mikes8606.wordpulse">
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
               <uses-permission android:name="android.permission.INTERNET" />
               <application android:allowBackup="true" android:label="Word Pulse" android:supportsRtl="true" android:theme="@style/Theme.WordPulse">
                   <activity android:name=".MainActivity" android:exported="true" android:theme="@style/Theme.WordPulse.NoActionBar">
@@ -127,9 +131,11 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.4'
         
       - name: Build Debug APK
-        run: gradle assembleDebug
+        run: gradle assembleDebug --info
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
