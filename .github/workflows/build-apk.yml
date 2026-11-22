@@ -50,7 +50,10 @@ jobs:
               defaultConfig { applicationId "com.mikes8606.wordpulse"; minSdk 24; targetSdk 34; versionCode 1; versionName "1.0" }
               compileOptions { sourceCompatibility JavaVersion.VERSION_1_8; targetCompatibility JavaVersion.VERSION_1_8 }
           }
-          dependencies { implementation 'androidx.appcompat:appcompat:1.6.1' }
+          dependencies { 
+              implementation 'androidx.appcompat:appcompat:1.6.1'
+              implementation 'androidx.webkit:webkit:1.9.0'
+          }
           EOF
 
           cat << 'EOF' > app/src/main/res/drawable/ic_launcher_background.xml
@@ -96,8 +99,12 @@ jobs:
           import android.webkit.WebChromeClient;
           import android.webkit.WebSettings;
           import android.webkit.WebView;
-          import android.webkit.WebViewClient;
+          import android.webkit.WebResourceRequest;
+          import android.webkit.WebResourceResponse;
           import androidx.appcompat.app.AppCompatActivity;
+          import androidx.webkit.WebViewAssetLoader;
+          import androidx.webkit.WebViewClientCompat;
+
           public class MainActivity extends AppCompatActivity {
               @Override
               protected void onCreate(Bundle savedInstanceState) {
@@ -107,12 +114,20 @@ jobs:
                   WebSettings webSettings = webView.getSettings();
                   webSettings.setJavaScriptEnabled(true);
                   webSettings.setDomStorageEnabled(true);
-                  webSettings.setAllowFileAccessFromFileURLs(true);
-                  webSettings.setAllowUniversalAccessFromFileURLs(true);
-                  webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+                  
+                  final WebViewAssetLoader assetLoader = new WebViewAssetLoader.Builder()
+                      .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
+                      .build();
+
+                  webView.setWebViewClient(new WebViewClientCompat() {
+                      @Override
+                      public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                          return assetLoader.shouldInterceptRequest(request.getUrl());
+                      }
+                  });
+                  
                   webView.setWebChromeClient(new WebChromeClient());
-                  webView.setWebViewClient(new WebViewClient());
-                  webView.loadUrl("file:///android_asset/index.html");
+                  webView.loadUrl("https://appassets.androidplatform.net/assets/index.html");
               }
           }
           EOF
