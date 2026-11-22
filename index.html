@@ -468,22 +468,26 @@
         }
 
         function renderLetterBoard() {
-            DOM.letterBoard.innerHTML = '';
-            gameState.scrambledLetters.forEach(item => {
-                const btn = document.createElement('button');
-                btn.className = `w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-xl text-3xl md:text-4xl font-black transition-all flex items-center justify-center touch-manipulation select-none border-b-4 active:border-b-0 active:translate-y-[4px] ${
-                    item.used 
-                    ? 'bg-slate-900 text-slate-800 border-slate-950 opacity-50 cursor-default' 
-                    : 'bg-slate-800 text-purple-300 border-slate-950 cursor-pointer shadow-lg hover:bg-slate-700'
-                }`;
-                btn.innerText = item.char;
-                btn.addEventListener('pointerdown', (e) => {
-                    e.preventDefault();
-                    handleLetterClick(item);
-                });
-                DOM.letterBoard.appendChild(btn);
-            });
-        }
+    DOM.letterBoard.innerHTML = '';
+    gameState.scrambledLetters.forEach(item => {
+        const btn = document.createElement('button');
+        
+        // Repaired: Added the missing `${` to correctly inject the conditional classes
+        btn.className = `w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-xl text-3xl font-bold flex items-center justify-center transition-all ${
+                    ${item.used
+            ? 'bg-slate-900 text-slate-800 border-slate-950 opacity-50 cursor-default'
+            : 'bg-slate-800 text-purple-300 border-slate-950 cursor-pointer shadow-lg hover:bg-slate-700'
+        }`;
+        
+        btn.innerText = item.char;
+        btn.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            handleLetterClick(item);
+        });
+        DOM.letterBoard.appendChild(btn);
+    });
+}
+
 
         function renderInputDisplay() {
             DOM.inputDisplay.innerHTML = '';
